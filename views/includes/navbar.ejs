@@ -1,4 +1,11 @@
 <style>
+  .custom-link {
+      color: #13b5c7;
+  }
+
+  .custom-link:hover {
+    color: #0d97a8;
+  }
   .search-btn {
     background-color: #13b5c7;
     color: white;
@@ -73,17 +80,17 @@
       <% } %>
       
       <div class="navbar-nav ms-auto">
-        <a class="nav-link fw-semibold" href="/listings" style="color: #13b5c7;">
+        <a class="nav-link fw-semibold custom-link" href="/listings">
           <i class="fa-solid fa-binoculars me-1"></i>Explore
         </a>
-        <% if (!isHomePage) { %>
+        <% if (currentUser) { %>
         <a class="nav-link" href="/listings/new">Add New Listings</a>
         <% } %>
         <% if (!currentUser) { %>
-        <a class="nav-link" href="/signup"><b>Sign up</b></a>
-        <a class="nav-link" href="/login"><b>Log in</b></a>
+        <a class="nav-link" href="/signup"><b>Sign Up</b></a>
+        <a class="nav-link" href="/login"><b>Log In</b></a>
         <% } %> <% if (currentUser) { %>
-        <a class="nav-link" href="/logout">Log out</a>
+        <a class="nav-link" href="/logout">Log Out</a>
         <% } %>
       </div>
     </div>

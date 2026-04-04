@@ -1,4 +1,10 @@
 <% layout("/layouts/boilerplate") %>
+<div class="page-back-wrap">
+  <a href="/listings" class="back-link">
+    <i class="fa-solid fa-arrow-left"></i>
+    <span>Back</span>
+  </a>
+</div>
 <div class="row mt-3">
   <div class="col-12 col-md-8 offset-md-3">
     <h3><%= listing.title %></h3>
@@ -21,9 +27,13 @@
   </div>
   <% if(currentUser && !listing.owner._id.equals(currentUser._id)) {%>
   <div class="col-12 col-md-8 offset-md-2 offset-lg-3">
-    <form method="POST" action="/listings/<%= listing._id %>/book">
-      <button class="btn btn-success mb-2 px-4">Book</button>
-    </form>
+    <button
+      id="bookNowBtn"
+      class="btn btn-success mb-2 px-4"
+      data-listing-id="<%= listing._id %>"
+    >
+      Book Now
+    </button>
   </div>
   <% } %> <% if(currentUser && listing.owner._id.equals(currentUser._id)) {%>
   <div class="col-12 col-md-8 offset-md-2 offset-lg-3">
@@ -141,3 +151,97 @@
     </div>
   </div>
 </div>
+
+<% if(currentUser && !listing.owner._id.equals(currentUser._id)) {%>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  (() => {
+    const bookBtn = document.getElementById("bookNowBtn");
+
+    if (!bookBtn) return;
+
+    bookBtn.addEventListener("click", async () => {
+      const listingId = bookBtn.dataset.listingId;
+
+      try {
+        bookBtn.disabled = true;
+        bookBtn.textContent = "Please wait...";
+
+        const orderRes = await fetch(`/payments/createOrder/${listingId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const orderData = await orderRes.json();
+
+        if (!orderRes.ok || !orderData.success) {
+          throw new Error(orderData.msg || "Unable to create payment order");
+        }
+
+        const options = {
+          key: orderData.key_id,
+          amount: orderData.amount,
+          currency: "INR",
+          name: "StayFinder",
+          description: orderData.product_name || "Listing Booking",
+          order_id: orderData.order_id,
+          hidden: {
+            contact: true,
+            email: true,
+          },
+          remember_customer: false,
+          prefill: {
+            name: "",
+            email: "",
+            contact: "",
+          },
+          theme: {
+            color: "#13b5c7",
+          },
+          handler: async function (response) {
+            const captureRes = await fetch("/payments/capturePayment", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                paymentId: response.razorpay_payment_id,
+                amount: orderData.amount,
+                listingId,
+              }),
+            });
+
+            const captureData = await captureRes.json();
+
+            if (!captureRes.ok || !captureData.success) {
+              throw new Error(captureData.msg || "Payment capture failed");
+            }
+
+            window.location.href = captureData.redirectUrl || `/listings/${listingId}`;
+          },
+        };
+
+        const rzp = new Razorpay(options);
+
+        rzp.on("payment.failed", function (resp) {
+          alert(
+            "Payment failed: " +
+              (resp.error && resp.error.description
+                ? resp.error.description
+                : "Please try again."),
+          );
+        });
+
+        rzp.open();
+      } catch (err) {
+        alert(err.message || "Unable to start payment");
+      } finally {
+        bookBtn.disabled = false;
+        bookBtn.textContent = "Book Now";
+      }
+    });
+  })();
+</script>
+<% } %>

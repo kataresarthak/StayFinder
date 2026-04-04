@@ -11,9 +11,14 @@
 
   /* ── Hero ── */
   .hero-section {
+    margin-top: 2.5rem;
     padding: 2rem 1rem 3rem;
     text-align: center;
-    background: white;
+    background: linear-gradient(
+      135deg,
+      rgba(19, 181, 199, 0.05),
+      rgba(26, 53, 102, 0.05)
+    );
     position: relative;
     overflow: hidden;
   }
@@ -255,7 +260,10 @@
       <a href="/listings" class="btn-teal">
         <i class="fa-solid fa-magnifying-glass me-2"></i>Explore Listings
       </a>
-      <a href="/signup" class="btn-outline-navy">
+      <a
+        href="<%= currentUser ? '/listings' : '/signup' %>"
+        class="btn-outline-navy"
+      >
         <i class="fa-solid fa-user-plus me-2"></i>Get Started Free
       </a>
     </div>

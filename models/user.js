@@ -6,7 +6,16 @@ const UserSchema = new Schema({
   email: {
     type: String,
     required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
   },
+  isEmailVerified: {
+    type: Boolean,
+    default: false,
+  },
+  emailOtpHash: String,
+  emailOtpExpires: Date,
 });
 
 UserSchema.plugin(passportLocalMongoose);

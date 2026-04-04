@@ -1,0 +1,53 @@
+<% layout("/layouts/boilerplate") %>
+<div class="row mt-3">
+  <div class="col-11 col-sm-8 col-md-6 mx-auto">
+    <h3>Verify your email</h3>
+    <p class="text-muted">
+      Enter the 6-digit OTP sent to your email to activate your account.
+    </p>
+
+    <form
+      method="POST"
+      action="/verify-email"
+      novalidate
+      class="needs-validation"
+    >
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input
+          name="email"
+          id="email"
+          type="email"
+          class="form-control"
+          value="<%= email %>"
+          required
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="otp" class="form-label">OTP</label>
+        <input
+          name="otp"
+          id="otp"
+          placeholder="Enter 6-digit code"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]{6}"
+          maxlength="6"
+          class="form-control"
+          required
+        />
+        <div class="invalid-feedback">Please enter a valid 6-digit OTP.</div>
+      </div>
+
+      <button type="submit" class="btn btn-success">Verify Email</button>
+    </form>
+
+    <hr />
+
+    <form method="POST" action="/verify-email/resend">
+      <input type="hidden" name="email" value="<%= email %>" />
+      <button type="submit" class="btn btn-outline-primary">Resend OTP</button>
+    </form>
+  </div>
+</div>

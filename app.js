@@ -12,15 +12,18 @@ const ExpressError = require("./utils/ExpressError.js");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
-const passport = require("passport");
-const LocalStrategy = require("passport-local");
-const User = require("./models/user.js");
+const cookieParser = require("cookie-parser");
+const {
+  attachCurrentUser,
+  AUTH_COOKIE_MAX_AGE_MS,
+} = require("./utils/jwtAuth.js");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 
 const listingRouter = require("./routes/listing.js");
 const reviewRouter = require("./routes/review.js");
 const userRouter = require("./routes/user.js");
+const paymentRouter = require("./routes/payment.js");
 
 // Use Atlas in production, local MongoDB in development
 const dbUrl = process.env.ATLASDB_URL || "mongodb://127.0.0.1:27017/wanderlust";
@@ -40,6 +43,7 @@ main()
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
@@ -80,22 +84,17 @@ const sessionOptions = {
   store,
   secret,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
   cookie: {
-    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: AUTH_COOKIE_MAX_AGE_MS,
     httpOnly: true,
   },
 };
 
 app.use(session(sessionOptions));
 app.use(flash());
-
-app.use(passport.initialize());
-app.use(passport.session());
-passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+app.use(cookieParser());
+app.use(attachCurrentUser);
 
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
@@ -113,6 +112,7 @@ app.get("/", (req, res) => {
 
 app.use("/listings", listingRouter);
 app.use("/listings/:id/reviews", reviewRouter);
+app.use("/payments", paymentRouter);
 app.use("/", userRouter);
 
 app.use((req, res, next) => {
