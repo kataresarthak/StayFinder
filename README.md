@@ -15,7 +15,7 @@ A modern, full-stack listing platform built with Node.js, Express, MongoDB, and 
 - Modern UI: Responsive interface with Bootstrap 5 and EJS templates
 
 ## 📁 Project Structure
-
+```text
 StayFinder/
 ├── app.js # Main application entry point
 ├── cloudConfig.js # Cloudinary configuration
@@ -77,7 +77,7 @@ StayFinder/
 └── init/ # Database initialization
 ├── index.js # Init script
 └── data.js # Sample seed data
-
+```
 ## 🛠️ Technologies Used
 
 - Backend: Node.js, Express.js
